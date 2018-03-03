@@ -13,11 +13,20 @@
 
 class Markdown {
  public:
-  int IsTitle(std::string s);
-	void SetTitle(int level);
+  void SetFrontTags();
+	void SetBackTags();
+  int IsTitle(std::string & s);
+  void SetTitle(int level,std::string& s);
+	int IsBlockquotes(std::string & s);
+	void SetBlockquotes();
+	bool IsUnOrderList(std::string& s);
+	void SetUnOrderList();
+	bool IsOrderList(std::string& s );
+	void SetOrderList();
+	std::vector<std::string>& GetContent();
 
  private:
-  //std::vector<std::string> v;
+  std::vector<std::string> v;
 
 };
 #endif //__PARSER_H

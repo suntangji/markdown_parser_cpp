@@ -8,16 +8,15 @@
 #include<fstream>
 #include"parser.h"
 
-using namespace std;
 
 int main(int argc,char* argv[]) {
-  vector<string> md;
-  vector<string> html;
-  const string default_input = "test.md";
-  const string default_output = "test.html";
-  string input;
-  string output;
-  string buff;
+	std::vector<std::string> md;
+	std::vector<std::string> html;
+  const std::string default_input = "test.md";
+  const std::string default_output = "test.html";
+	std::string input;
+	std::string output;
+	std::string buff;
   if(argc == 1) {
     input = default_input;
     output = default_output;
@@ -28,7 +27,7 @@ int main(int argc,char* argv[]) {
     input = argv[1];
     output = argv[2];
   }
-  ifstream in(input);
+	std::ifstream in(input);
   if(!in.is_open()) {
     perror("open input file error!");
     return -1;
@@ -40,15 +39,26 @@ int main(int argc,char* argv[]) {
   //markdown转换
   ///
 	Markdown m;
-	int level = m.IsTitle("###");		
-	cout<<level<<endl;
-  ofstream out(output);
+	m.SetFrontTags();
+	std::string s = md.front();
+	int level = m.IsTitle(s);		
+	if(level>0)
+		m.SetTitle(level,s);
+	//cout<<level<<endl;
+	int lv = m.IsBlockquotes(s);
+	if(lv>0)
+		std::cout<<lv<<std::endl;
+	m.SetBackTags();
+	html = m.GetContent();
+
+
+	std::ofstream out(output);
   if(!out.is_open()) {
     perror("open output file error!");
     return -1;
   }
   for(auto i:html) {
-    out<<i<<endl;
+		out<<i<<std::endl;
   }
 
   return 0;
