@@ -13,20 +13,32 @@
 
 class Markdown {
  public:
+	Markdown();
+	void Translate(std::vector<std::string>& md);
+	std::vector<std::string>& GetContent();
+
+ private:
   void SetFrontTags();
 	void SetBackTags();
   int IsTitle(std::string & s);
   void SetTitle(int level,std::string& s);
 	int IsBlockquotes(std::string & s);
-	void SetBlockquotes();
-	bool IsUnOrderList(std::string& s);
-	void SetUnOrderList();
-	bool IsOrderList(std::string& s );
-	void SetOrderList();
-	std::vector<std::string>& GetContent();
+	void SetBlockquotes(int level,std::string& s);
+	int IsUnOrderList(std::string& s);
+	void SetUnOrderList(int pos,std::string& s);
+	int IsOrderList(std::string& s );
+	void SetOrderList(int pos,std::string& s);
+	void Run(std::string& s);
 
- private:
   std::vector<std::string> v;
+
+	enum STATUS{
+		NORMAL,
+		LIST,
+		UNLIST,
+		CODE,
+		BLOCK
+	}status;
 
 };
 #endif //__PARSER_H

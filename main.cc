@@ -10,13 +10,13 @@
 
 
 int main(int argc,char* argv[]) {
-	std::vector<std::string> md;
-	std::vector<std::string> html;
+  std::vector<std::string> md;
+  std::vector<std::string> html;
   const std::string default_input = "test.md";
   const std::string default_output = "test.html";
-	std::string input;
-	std::string output;
-	std::string buff;
+  std::string input;
+  std::string output;
+  std::string buff;
   if(argc == 1) {
     input = default_input;
     output = default_output;
@@ -27,7 +27,7 @@ int main(int argc,char* argv[]) {
     input = argv[1];
     output = argv[2];
   }
-	std::ifstream in(input);
+  std::ifstream in(input);
   if(!in.is_open()) {
     perror("open input file error!");
     return -1;
@@ -38,27 +38,18 @@ int main(int argc,char* argv[]) {
   ///
   //markdown转换
   ///
-	Markdown m;
-	m.SetFrontTags();
-	std::string s = md.front();
-	int level = m.IsTitle(s);		
-	if(level>0)
-		m.SetTitle(level,s);
-	//cout<<level<<endl;
-	int lv = m.IsBlockquotes(s);
-	if(lv>0)
-		std::cout<<lv<<std::endl;
-	m.SetBackTags();
-	html = m.GetContent();
+  Markdown m;
+	m.Translate(md);
+  html = m.GetContent();
 
 
-	std::ofstream out(output);
+  std::ofstream out(output);
   if(!out.is_open()) {
     perror("open output file error!");
     return -1;
   }
   for(auto i:html) {
-		out<<i<<std::endl;
+    out<<i<<std::endl;
   }
 
   return 0;
