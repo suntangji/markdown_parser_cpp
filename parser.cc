@@ -153,8 +153,13 @@ int Markdown::IsBlockquotes(std::string& s) {
 void Markdown::SetBlockquotes(int level,std::string& s) {
   std::string s_content = s.substr(level+1);
 	if(status == NORMAL){
-		v.push_back("<blockquote>");
-		v.push_back(s_content);
+		while(level>0){
+			v.push_back("<blockquote>");
+			level--;
+			if(level>0)
+				Markdown::count_of_block++;
+		}
+		v.push_back(s_content+"<br>");
 		Markdown::pre_block = level;
 		Markdown::count_of_block = 1;
 	}else if(status == BLOCK){
