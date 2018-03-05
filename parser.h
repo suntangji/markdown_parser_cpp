@@ -28,9 +28,11 @@ class Markdown {
 	int IsOrderList(std::string& s );
 	void SetOrderList(int pos,std::string& s);
 	bool Run(std::string& s);
+	int OnlyText(std::string& s);
 
   std::vector<std::string> v;
 	static int pre_block ;
+	static int count_of_block;
 
 	enum STATUS{
 		NORMAL,

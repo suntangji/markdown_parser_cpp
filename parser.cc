@@ -9,10 +9,14 @@
 #include<regex>
 #include<stack>
 #include"parser.h"
+
+int Markdown::pre_block = 0;
+int Markdown::count_of_block = 0;
+
 Markdown::Markdown():status(NORMAL) {
 }
 void Markdown::Translate(std::vector<std::string>& md) {
-	Markdown::pre_block = 0;
+
   SetFrontTags();
   for(auto s:md) {
     if(status == NORMAL) {
@@ -38,6 +42,31 @@ void Markdown::Translate(std::vector<std::string>& md) {
 
     } else if(status == BLOCK) {
 			int level_block = IsBlockquotes(s);
+			if(level_block > 0 && level_block <= Markdown::pre_block){
+				SetBlockquotes(level_block,s);
+			}else if(level_block > 0 && level_block > Markdown::pre_block){
+				Markdown::count_of_block++;
+				v.push_back("<blockquote>");
+				SetBlockquotes(level_block,s);
+			}else if(level_block == 0){
+				if(s.size() == 0){
+					while(Markdown::count_of_block > 0){
+						v.push_back("</blockquote>");
+						Markdown::count_of_block--;
+					}
+					status = NORMAL;
+				}else if(OnlyText(s) > 0){
+					while(Markdown::count_of_block > 0){
+						v.push_back("</blockquote>");
+						Markdown::count_of_block--;
+					}
+					status = NORMAL;
+					Run(s);
+				}else {
+					v.push_back(s+"<br>");
+				}
+					
+			}
 				
     } else if(status == CODE) {
 
@@ -45,6 +74,9 @@ void Markdown::Translate(std::vector<std::string>& md) {
 
   }
   SetBackTags();
+}
+int Markdown::OnlyText(std::string& s){
+	return IsTitle(s) + IsBlockquotes(s) + IsOrderList(s) + IsUnOrderList(s) + IsUnOrderList(s);	
 }
 bool Markdown::Run(std::string& s) {
   int level_title = IsTitle(s);
@@ -70,6 +102,7 @@ bool Markdown::Run(std::string& s) {
 		status = BLOCK;
 		return true;
 	}
+	v.push_back(s);
 	return false;
 }
 void Markdown::SetFrontTags() {
@@ -123,8 +156,9 @@ void Markdown::SetBlockquotes(int level,std::string& s) {
 		v.push_back("<blockquote>");
 		v.push_back(s_content);
 		Markdown::pre_block = level;
+		Markdown::count_of_block = 1;
 	}else if(status == BLOCK){
-			v.push_back(s_content);
+			v.push_back(s_content + "<br>");
 	}
 
 
