@@ -6,16 +6,17 @@
 
 #include<iostream>
 #include<cctype>
+#include<regex>
+#include<stack>
 #include"parser.h"
 Markdown::Markdown():status(NORMAL) {
 }
 void Markdown::Translate(std::vector<std::string>& md) {
+	Markdown::pre_block = 0;
   SetFrontTags();
   for(auto s:md) {
     if(status == NORMAL) {
-      //Run(s);
-      std::cout<<s<<std::endl;
-      std::cout<<IsUnOrderList(s)<<std::endl;
+      Run(s);
     } else if(status == UNLIST) {
       int level_unorder_list = IsUnOrderList(s);
       if(level_unorder_list>0)
@@ -26,7 +27,18 @@ void Markdown::Translate(std::vector<std::string>& md) {
         Run(s);
       }
     } else if(status == LIST) {
+			int level_order_list = IsOrderList(s);
+			if(level_order_list>0)
+				SetOrderList(level_order_list,s);
+			else{
+				v.push_back("</ol>");
+				status = NORMAL;
+				Run(s);
+			}
 
+    } else if(status == BLOCK) {
+			int level_block = IsBlockquotes(s);
+				
     } else if(status == CODE) {
 
     }
@@ -34,18 +46,31 @@ void Markdown::Translate(std::vector<std::string>& md) {
   }
   SetBackTags();
 }
-void Markdown::Run(std::string& s) {
+bool Markdown::Run(std::string& s) {
   int level_title = IsTitle(s);
-  if(level_title>0)
+  if(level_title>0){
     SetTitle(level_title,s);
-  int level_block = IsBlockquotes(s);
-  if(level_block>0)
-    SetBlockquotes(level_block,s);
+		return true;
+	}
   int level_unorder_list = IsUnOrderList(s);
   if(level_unorder_list>0) {
     SetUnOrderList(level_unorder_list,s);
     status = UNLIST;
+		return true;
   }
+	int level_order_list = IsOrderList(s);
+	if(level_order_list>0) {
+		SetOrderList(level_order_list,s);
+		status = LIST;
+		return true;
+	}
+	int level_block = IsBlockquotes(s);
+	if(level_block>0){
+		SetBlockquotes(level_block,s);
+		status = BLOCK;
+		return true;
+	}
+	return false;
 }
 void Markdown::SetFrontTags() {
   v.push_back("<!DOCTYPE html>");
@@ -94,24 +119,23 @@ int Markdown::IsBlockquotes(std::string& s) {
 }
 void Markdown::SetBlockquotes(int level,std::string& s) {
   std::string s_content = s.substr(level+1);
-  std::string left_tag;
-  std::string right_tag;
-  while(level>0) {
-    left_tag.append("<blockquote>");
-    right_tag.append("</blockqupte>");
-    level--;
-  }
-  v.push_back(left_tag);
-  v.push_back(s_content);
-  v.push_back(right_tag);
+	if(status == NORMAL){
+		v.push_back("<blockquote>");
+		v.push_back(s_content);
+		Markdown::pre_block = level;
+	}else if(status == BLOCK){
+			v.push_back(s_content);
+	}
+
+
 }
 int Markdown::IsUnOrderList(std::string& s) {
-	size_t index = 0;
-	std::regex re("^\\s*[-+*]{1}\\s+.*");
-	std::smatch sm;
-	std::regex_match(s,sm,re);
-	if(sm.size() == 0)
-		return 0;
+  size_t index = 0;
+  std::regex re("^\\s*[-+*]{1}\\s+.*");
+  std::smatch sm;
+  std::regex_match(s,sm,re);
+  if(sm.size() == 0)
+    return 0;
   while(index<s.size() && s[index]== ' ')
     index++;
   if(index<s.size() && (s[index]= '-'|| s[index] == '+' || s[index] == '*')) {
@@ -119,7 +143,7 @@ int Markdown::IsUnOrderList(std::string& s) {
     if(index<s.size()&& s[index] == ' ')
       return index;
   }
-	return 0;
+  return 0;
 }
 int Markdown::IsOrderList(std::string& s) {
   std::regex re("^\\s*\\d+\\.\\s.*?");
@@ -140,7 +164,11 @@ void Markdown::SetUnOrderList(int pos,std::string& s) {
     v.push_back("<ul>");
   }
   v.push_back("<li>"+s_list+"</li>");
-  //v.push_back(s_list);
-  //v.push_back("</li>");
-
+}
+void Markdown::SetOrderList(int pos,std::string& s){
+	std::string s_order_list = s.substr(pos+1);
+	if(status == NORMAL){
+		v.push_back("<ol>");
+	}	
+	v.push_back("<li>"+ s_order_list+"</li>");
 }

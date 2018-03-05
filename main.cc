@@ -35,6 +35,8 @@ int main(int argc,char* argv[]) {
   while(getline(in,buff)) {
     md.push_back(buff);
   }
+	//确保status是NORMAL
+	md.push_back("\n");
   ///
   //markdown转换
   ///

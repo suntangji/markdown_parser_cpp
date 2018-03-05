@@ -9,7 +9,6 @@
 
 #include<string>
 #include<vector>
-#include<regex>
 
 class Markdown {
  public:
@@ -28,9 +27,10 @@ class Markdown {
 	void SetUnOrderList(int pos,std::string& s);
 	int IsOrderList(std::string& s );
 	void SetOrderList(int pos,std::string& s);
-	void Run(std::string& s);
+	bool Run(std::string& s);
 
   std::vector<std::string> v;
+	static int pre_block ;
 
 	enum STATUS{
 		NORMAL,
@@ -39,6 +39,6 @@ class Markdown {
 		CODE,
 		BLOCK
 	}status;
-
 };
+
 #endif //__PARSER_H
