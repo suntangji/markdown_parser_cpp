@@ -29,6 +29,9 @@ class Markdown {
 	void SetOrderList(int pos,std::string& s);
 	bool Run(std::string& s);
 	int OnlyText(std::string& s);
+	void SetToken(std::string& s);
+	bool IsCode(std::string& s);
+	void SetCode(std::string& s);
 
   std::vector<std::string> v;
 	static int pre_block ;

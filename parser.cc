@@ -72,11 +72,19 @@ void Markdown::Translate(std::vector<std::string>& md) {
 			}
 				
     } else if(status == CODE) {
+			if(IsCode(s)){
+				v.push_back("</pre></code>");
+				status = NORMAL;
+			}else{
+				SetCode(s);
+			}
 
+    } else if(status == CODE) {
+    } else if(status == CODE) {
     }
 
   }
-  SetBackTags();
+	SetBackTags();
 }
 int Markdown::OnlyText(std::string& s){
 	return IsTitle(s) + IsBlockquotes(s) + IsOrderList(s) + IsUnOrderList(s) + IsUnOrderList(s);	
@@ -105,8 +113,35 @@ bool Markdown::Run(std::string& s) {
 		status = BLOCK;
 		return true;
 	}
+	if(IsCode(s)){
+		SetCode(s);
+		status = CODE;
+		return true;
+	}
 	v.push_back(s);
 	return false;
+}
+bool Markdown::IsCode(std::string& s){
+	std::regex re("^```\\s*[a-zA-Z0-9]*\\s*");
+	std::smatch sm;
+	std::regex_match(s,sm,re);
+	if(sm.size()>0){
+		return true;
+	}	
+	return false;
+}
+void Markdown::SetCode(std::string& s){
+	if(status == NORMAL){
+		v.push_back("<code><pre>");
+	}else
+		v.push_back(s);
+}
+void Markdown::SetToken(std::string& s){
+	std::regex re_lt("<");
+	std::regex re_and("&");
+	std::regex re_link("\\[(.*)\\]\\((.*)\\)");
+	std::regex re_img("!\\[(.*)\\]\\((.*)\\)");
+	std::regex re_i("\\*([^\\*]+)\\*");	
 }
 void Markdown::SetFrontTags() {
   v.push_back("<!DOCTYPE html>");
