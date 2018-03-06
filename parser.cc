@@ -46,6 +46,7 @@ void Markdown::Translate(std::vector<std::string>& md) {
 				SetBlockquotes(level_block,s);
 			}else if(level_block > 0 && level_block > Markdown::pre_block){
 				Markdown::count_of_block++;
+				Markdown::pre_block = level_block;
 				v.push_back("<blockquote>");
 				SetBlockquotes(level_block,s);
 			}else if(level_block == 0){
@@ -54,12 +55,14 @@ void Markdown::Translate(std::vector<std::string>& md) {
 						v.push_back("</blockquote>");
 						Markdown::count_of_block--;
 					}
+					Markdown::pre_block = 0;
 					status = NORMAL;
 				}else if(OnlyText(s) > 0){
 					while(Markdown::count_of_block > 0){
 						v.push_back("</blockquote>");
 						Markdown::count_of_block--;
 					}
+					Markdown::pre_block = 0;
 					status = NORMAL;
 					Run(s);
 				}else {
@@ -153,15 +156,13 @@ int Markdown::IsBlockquotes(std::string& s) {
 void Markdown::SetBlockquotes(int level,std::string& s) {
   std::string s_content = s.substr(level+1);
 	if(status == NORMAL){
+		Markdown::pre_block = level;
 		while(level>0){
 			v.push_back("<blockquote>");
 			level--;
-			if(level>0)
-				Markdown::count_of_block++;
+			Markdown::count_of_block++;
 		}
 		v.push_back(s_content+"<br>");
-		Markdown::pre_block = level;
-		Markdown::count_of_block = 1;
 	}else if(status == BLOCK){
 			v.push_back(s_content + "<br>");
 	}
