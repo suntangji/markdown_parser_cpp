@@ -18,7 +18,8 @@ Markdown::Markdown():status(NORMAL) {
 void Markdown::Translate(std::vector<std::string>& md) {
 
   SetFrontTags();
-  for(auto s:md) {
+  for(size_t i = 0;i< md.size();++i) {
+		std::string s = md[i];
     if(status == NORMAL) {
       Run(s);
     } else if(status == UNLIST) {
@@ -86,9 +87,6 @@ void Markdown::Translate(std::vector<std::string>& md) {
   }
 	SetBackTags();
 }
-int Markdown::OnlyText(std::string& s){
-	return IsTitle(s) + IsBlockquotes(s) + IsOrderList(s) + IsUnOrderList(s) + IsUnOrderList(s);	
-}
 bool Markdown::Run(std::string& s) {
   int level_title = IsTitle(s);
   if(level_title>0){
@@ -120,6 +118,9 @@ bool Markdown::Run(std::string& s) {
 	}
 	v.push_back(s);
 	return false;
+}
+int Markdown::OnlyText(std::string& s){
+	return IsTitle(s) + IsBlockquotes(s) + IsOrderList(s) + IsUnOrderList(s) + IsUnOrderList(s);	
 }
 bool Markdown::IsCode(std::string& s){
 	std::regex re("^```\\s*[a-zA-Z0-9]*\\s*");
@@ -246,4 +247,8 @@ void Markdown::SetOrderList(int pos,std::string& s){
 		v.push_back("<ol>");
 	}	
 	v.push_back("<li>"+ s_order_list+"</li>");
+}
+
+int Markdown::IsTable(std::string& s){
+	std::regex re("");	
 }
