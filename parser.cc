@@ -12,6 +12,8 @@
 
 int Markdown::pre_block = 0;
 int Markdown::count_of_block = 0;
+std::vector<std::string> table_context;
+std::vector<std::string> table_head;
 
 Markdown::Markdown():status(NORMAL) {
 }
@@ -80,14 +82,30 @@ void Markdown::Translate(std::vector<std::string>& md) {
         SetCode(s);
       }
     } else if(status == TABLE_START) {
-			if(IsTable(s)){
-				//SetTable	
-				status = TABLE;
-			}else{
-				v.push_back(s);
-				status = NORMAL;
-			}
+      if(IsTable(s)) {
+        //SetTable
+        status = TABLE;
+      } else {
+        v.push_back(md[i-1]);
+        //v.push_back(s);
+        i--;
+        status = NORMAL;
+        table_head.clear() ;
+        table_context.clear() ;
+      }
     } else if(status == TABLE) {
+      if(IsTable(s)) {
+        SetTable();
+      } else {
+        if(table_context.empty()) {
+          v.push_back(md[i-2]);
+          v.push_back(md[i-1]);
+        }
+        i--;
+        table_head.clear();
+        table_context.clear();
+        status = NORMAL;
+      }
     }
 
   }
@@ -122,10 +140,10 @@ bool Markdown::Run(std::string& s) {
     status = CODE;
     return true;
   }
-	if(IsTable(s)){
-		status = TABLE_START;
-		return true;
-	}
+  if(IsTable(s)) {
+    status = TABLE_START;
+    return true;
+  }
   v.push_back(s);
   return false;
 }
@@ -264,9 +282,13 @@ bool Markdown::IsTable(std::string& s) {
     std::regex re("(.+)\\|(.+)");
     std::smatch sm;
     std::regex_match(s,sm,re);
-    if(sm.size()>0)
+    if(sm.size()>0) {
+      if(status == NORMAL) {
+        GetTableContext(table_head,s);
+      } else
+        GetTableContext(table_context,s);
       return true;
-    else
+    } else
       return false;
   } else if(status == TABLE_START ) {
     std::regex re("\\:*\\-+\\:*\\|\\:*\\-+\\:*");
@@ -278,4 +300,31 @@ bool Markdown::IsTable(std::string& s) {
       return false;
   }
   return false;
+}
+void Markdown::GetTableContext(std::vector<std::string>& table_context,std::string& s) {
+  std::string tag = "|";
+  size_t pos1 = 0, pos2 = 0;
+  pos2 = s.find(tag);
+  while(pos2!= std::string::npos) {
+    table_context.push_back(s.substr(pos1,pos2-pos1));
+    pos1 = pos2 + 1;
+    pos2 = s.find(tag,pos1);
+  }
+  if(pos1!= s.size())
+    table_context.push_back(s.substr(pos1));
+}
+void Markdown::SetTable() {
+  v.push_back("<table>");
+  v.push_back("<tr>");
+  for(auto i:table_head) {
+    v.push_back("<th>" + i + "</th>" );
+  }
+  v.push_back("</tr>");
+  v.push_back("<tr>");
+  for(auto i:table_context) {
+    v.push_back("<td>" + i + "</td>" );
+  }
+  v.push_back("</tr>");
+  v.push_back("</table>");
+
 }

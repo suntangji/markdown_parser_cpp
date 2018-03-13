@@ -33,6 +33,8 @@ class Markdown {
 	bool IsCode(std::string& s);
 	void SetCode(std::string& s);
 	bool IsTable(std::string& s);
+	void SetTable();
+	void GetTableContext(std::vector<std::string>& table_context,std::string& s);
 
   std::vector<std::string> v;
 	static int pre_block ;
