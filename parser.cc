@@ -14,6 +14,7 @@ int Markdown::pre_block = 0;
 int Markdown::count_of_block = 0;
 std::vector<std::string> table_context;
 std::vector<std::string> table_head;
+size_t code_start = 0;
 
 Markdown::Markdown():status(NORMAL) {
 }
@@ -76,6 +77,7 @@ void Markdown::Translate(std::vector<std::string>& md) {
 
     } else if(status == CODE) {
       if(IsCode(s)) {
+
         v.push_back("</pre></code>");
         status = NORMAL;
       } else {
@@ -107,8 +109,12 @@ void Markdown::Translate(std::vector<std::string>& md) {
         status = NORMAL;
       }
     }
-
   }
+	if(status == CODE){
+		//std::cout<<code_start<<std::endl;
+		//std::cout<<*(v.begin()+code_start);
+		v.erase(v.begin()+code_start);
+	}
   SetBackTags();
 }
 bool Markdown::Run(std::string& s) {
@@ -136,6 +142,7 @@ bool Markdown::Run(std::string& s) {
     return true;
   }
   if(IsCode(s)) {
+		code_start = v.size();
     SetCode(s);
     status = CODE;
     return true;
