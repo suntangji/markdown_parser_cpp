@@ -8,6 +8,7 @@
 #include<cctype>
 #include<regex>
 #include<stack>
+#include<iterator>
 #include"parser.h"
 
 int Markdown::pre_block = 0;
@@ -20,6 +21,7 @@ Markdown::Markdown():status(NORMAL) {
 }
 void Markdown::Translate(std::vector<std::string>& md) {
 
+	SetToken(md);
   SetFrontTags();
   for(size_t i = 0; i< md.size(); ++i) {
     std::string s = md[i];
@@ -172,12 +174,29 @@ void Markdown::SetCode(std::string& s) {
   } else
     v.push_back(s);
 }
-void Markdown::SetToken(std::string& s) {
-  std::regex re_lt("<");
-  std::regex re_and("&");
+void Markdown::SetToken(std::vector<std::string>& md) {
+	std::string temp,temp2;
+   //std::regex re_lt("<");
+  //std::regex re_and("&");
   std::regex re_link("\\[(.*)\\]\\((.*)\\)");
   std::regex re_img("!\\[(.*)\\]\\((.*)\\)");
   std::regex re_i("\\*([^\\*]+)\\*");
+	std::regex re_s("\\*\\*([^\\*\\*]+)\\*\\*");
+	for(size_t i = 0;i<md.size();++i){
+		temp = md[i];
+		temp2.clear();
+		std::regex_replace(std::back_inserter(temp2),temp.begin(),temp.end(),re_s,"<strong> $1</strong>");
+		temp.clear();
+		std::regex_replace(std::back_inserter(temp),temp2.begin(),temp2.end(),re_i,"<i> $1 </i>");
+		temp2.clear();
+		std::regex_replace(std::back_inserter(temp2),temp.begin(),temp.end(),re_img,"<img src = \"$2\" align=\"middle\">");
+		temp.clear();
+		std::regex_replace(std::back_inserter(temp),temp2.begin(),temp2.end(),re_link,"<a href = \"$2\" target=\"_blank\">$1</a>");
+		md[i] = temp;
+
+		std::cout<<temp<<std::endl;
+	}
+
 }
 void Markdown::SetFrontTags() {
   v.push_back("<!DOCTYPE html>");
